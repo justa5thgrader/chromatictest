@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const { uvPath } = require('@titaniumnetwork-dev/ultraviolet');
-const bare = require('@tomphttp/bare-server-node');
+const { BareServer } = require('@tomphttp/bare-server-node');
 const path = require('path');
 const http = require('http');
 const fs = require('fs');
@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
 
 // Create bare server
-const bareServer = bare.createServer('/bare/');
+const bareServer = new BareServer('/bare/');
 
 // Configure Express
 app.use(express.static(path.join(__dirname, 'public')));
