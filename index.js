@@ -1,32 +1,49 @@
+// Ultraviolet backend server
 const express = require('express');
 const cors = require('cors');
-const bare = require('@tomphttp/bare-server-node');
-const { UVRequest, UVResponse } = require('@titaniumnetwork-dev/ultraviolet/dist/uv');
-const { UVServer } = require('@titaniumnetwork-dev/ultraviolet/dist/uv/server');
+const { uvPath } = require('@titaniumnetwork-dev/ultraviolet');
+const { createBareServer } = require('@tomphttp/bare-server-node');
 const path = require('path');
+const http = require('http');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const HOST = '0.0.0.0';
 
-// Create Bare server for Ultraviolet
-const bareServer = bare.createBareServer('/bare/');
+// Create bare server
+const bareServer = createBareServer('/bare/');
 
-// Serve static files from the public directory
+// Configure Express
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'uv')));
 app.use(cors());
 
-// Main Ultraviolet middleware
-const uvServer = new UVServer({
-  bare: bareServer,
-  request: UVRequest,
-  response: UVResponse
+// Serve Ultraviolet files
+app.use('/uv/', express.static(uvPath));
+
+// Handle requests
+app.use((req, res) => {
+  // Handle bare requests
+  if (bareServer.shouldRoute(req)) {
+    bareServer.routeRequest(req, res);
+    return;
+  }
+
+  // Handle HTTP upgrades
+  app.handle(req, res);
 });
-app.use((req, res) => uvServer.handleRequest(req, res));
+
+// Handle upgrades
+server.on('upgrade', (req, socket, head) => {
+  if (bareServer.shouldRoute(req)) {
+    bareServer.routeUpgrade(req, socket, head);
+    return;
+  }
+  socket.end();
+});
 
 // Start the server
-const server = app.listen(PORT, () => {
-  console.log(`Ultraviolet server running on port ${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Ultraviolet server running on http://${HOST}:${PORT}`);
 });
-
-// Attach bare server to the HTTP server
-bareServer.attach(server);
