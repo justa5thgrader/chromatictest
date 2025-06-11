@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { createBareServer } = require('@tomphttp/bare-server-node');
+const bare = require('@tomphttp/bare-server-node');
 const { UVRequest, UVResponse } = require('@titaniumnetwork-dev/ultraviolet/dist/uv');
 const { UVServer } = require('@titaniumnetwork-dev/ultraviolet/dist/uv/server');
 const path = require('path');
@@ -9,12 +9,10 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // Create Bare server for Ultraviolet
-const bareServer = createBareServer('/bare/');
+const bareServer = bare.createBareServer('/bare/');
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
-
-// CORS setup (optional, but recommended)
 app.use(cors());
 
 // Main Ultraviolet middleware
